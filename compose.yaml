@@ -1,0 +1,41 @@
+services:
+  sveltekit:
+    restart: unless-stopped
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+      args:
+        MONGODB_URI: "mongodb://mongo:27017/musicdb"
+    environment:
+      NODE_ENV: production
+      HOST: "0.0.0.0"
+      PORT: 3000
+      MONGODB_URI: "mongodb://mongo:27017/musicdb"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+    #deploy:
+    #  resources:
+    #    reservations:
+    #      memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+
+  mongo:
+    restart: unless-stopped
+    image: mongo:latest
+    ports:
+      - mode: host
+        target: 27017
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: musicdb
+    #deploy:
+    #  resources:
+    #    reservations:
+    #      memory: 256M
+
+volumes:
+  mongo-data:
